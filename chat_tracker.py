@@ -1,43 +1,21 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import requests
 from bs4 import BeautifulSoup as bs
 import urllib
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
-
-
-# In[2]:
-
-
 import pandas as pd
 import numpy as np
 import datetime
 import time
 
-
-# In[3]:
-
-
 print("url :")
 url = input()
-print("tiem(s) : ")
+print("time(s) : ")
 sec = int(input())
 
-
-# In[4]:
-
-
-driver = webdriver.Chrome('/home/edward/twitch/chromedriver')
+driver = webdriver.Chrome('C:/Users/edward/projects/twitch_livechat_collector/chromedriver.exe')
 driver.get(url)
-time.sleep(10)
-
-
-# In[5]:
+time.sleep(10)  # Wait for connecting site
 
 
 def getChats(sec):
@@ -47,10 +25,8 @@ def getChats(sec):
     viewers=[]
     for i in range(int(sec/10)):
         soup=bs(driver.page_source,'lxml')
-        viewer=soup.find("span",{"class":"tw-animated-number tw-animated-number--monospaced"}).text
-        
-        temp = soup.find("div",{"class":"chat-shell chat-shell__expanded tw-full-height"})
-
+        viewer=soup.find("p",{"data-a-target":"animated-channel-viewers-count"}).text
+        temp = soup.find('div', {'class': 'chat-shell'})
         msg = temp.findAll("div",{"class":"chat-line__message"})
         msgs.append(msg)
         times.append(datetime.datetime.now().strftime("%H:%M"))
@@ -66,26 +42,17 @@ def getChats(sec):
     return(msgs,times,viewers)
 
 
-# In[ ]:
-
-
 start = time.time()
 result = getChats(sec)
 print("while ",time.time()-start,"s")
-
-
-# In[ ]:
-
 
 msgs = result[0]
 times = result[1]
 viewers = result[2]
 
 
-# In[ ]:
-
-
 df = pd.DataFrame()
+# preprocessing
 for i in range(len(msgs)):
 
     dfTemp = pd.DataFrame([x.split(":") for x in [x.text for x in msgs[i]]])
@@ -98,21 +65,6 @@ for i in range(len(msgs)):
     
     df = df.append(dfTemp)
 
-
-# In[ ]:
-
-
 df = df.drop_duplicates(['id','contents'])
-
-
-# In[ ]:
-
-
 filename = url.split('/')[-1]+"_"+datetime.datetime.now().strftime("%m%d")+".csv"
-
-
-# In[ ]:
-
-
 df.to_csv(filename,index=False)
-

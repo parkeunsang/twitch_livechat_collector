@@ -1,5 +1,7 @@
 # twitch_livechat_collector
-using selenium
+### Version
+- Python 3.7.6
+- 1.0(2021.12.17)
 
 ### collector
 chat_tracker.py
